@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
 import { ContactService } from './services/contact.service';
-import { IContact } from './ts/models/contact.model';
+import { IContactData } from './ts/models/contact.model';
 
 @Component({
 	selector: 'app-main',
@@ -11,7 +11,7 @@ import { IContact } from './ts/models/contact.model';
 })
 export class MainComponent implements OnInit {
 
-	contactsInfo$: Observable<IContact[]>;
+	contactsInfo$: Observable<IContactData[]>;
 
 	destroy: Subject<void> = new Subject();
 
