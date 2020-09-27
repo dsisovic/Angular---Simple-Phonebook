@@ -18,11 +18,14 @@ export class ContactEditComponent implements OnInit, OnDestroy {
 	isPreviewMode = false;
 
 	isLoading = true;
+	contactFormChanged = false;
 
 	tagIndex: number;
 	contactId: string;
+	contactName: string;
 
 	contactForm: FormGroup;
+	initialContactForm: FormGroup;
 
 	destroy: Subject<void> = new Subject();
 
@@ -43,14 +46,6 @@ export class ContactEditComponent implements OnInit, OnDestroy {
 		this.destroy.complete();
 	}
 
-	onAddTag(): void {
-		this.tags.push(new FormControl(''));
-	}
-
-	onRemoveTag(tagIndex: number): void {
-		this.tags.removeAt(tagIndex);
-	}
-
 	onSaveContact(): void {
 		// tslint:disable-next-line: max-line-length
 		const savePayload$ = this.isAddMode ? this.contactService.addContact$(this.contactForm.value) : this.contactService.editContact$({ ...this.contactForm.value, id: this.contactId });
@@ -58,10 +53,6 @@ export class ContactEditComponent implements OnInit, OnDestroy {
 		savePayload$
 			.pipe(takeUntil(this.destroy))
 			.subscribe(_ => this.router.navigateByUrl(''));
-	}
-
-	onGoBack(): void {
-		this.router.navigateByUrl('');
 	}
 
 	setRouterState(): void {
@@ -72,18 +63,20 @@ export class ContactEditComponent implements OnInit, OnDestroy {
 
 	setUiFormState(): void {
 		this.contactForm = this.contactService.buildContactForm();
-		// 1: edit contact mode
-		// 2: add contact mode
-		// 3: preview contact (readonly) mode
+		this.initialContactForm = this.contactService.buildContactForm();
+
 		if (this.isEditMode) {
 			this.fetchSelectedContactById(false);
 			this.watchUsernameValidatorChange();
+			this.watchContactFormChanges();
 		} else if (this.isPreviewMode) {
 			this.fetchSelectedContactById(true);
 			this.watchUsernameValidatorChange();
+			this.contactFormChanged = true;
 		} else if (this.isAddMode) {
 			this.setUsernameValidator();
 			this.isLoading = false;
+			this.contactFormChanged = true;
 		}
 	}
 
@@ -93,9 +86,10 @@ export class ContactEditComponent implements OnInit, OnDestroy {
 		this.contactService.fetchContactById$(this.contactId)
 			.pipe(takeUntil(this.destroy))
 			.subscribe(selectedContact => {
-				this.updateContactForm(selectedContact);
+				this.updateContactForms(selectedContact);
 				this.setFormDisabledState(disabledForm);
 				this.setUsernameValidator(selectedContact);
+				this.contactName = selectedContact.name;
 				this.isLoading = false;
 
 				this.cdRef.markForCheck();
@@ -109,9 +103,17 @@ export class ContactEditComponent implements OnInit, OnDestroy {
 			.subscribe(_ => this.cdRef.markForCheck());
 	}
 
+	watchContactFormChanges(): void {
+		this.contactForm.valueChanges
+			.pipe(takeUntil(this.destroy))
+			.subscribe(contactFormValue => {
+				this.contactFormChanged = JSON.stringify(contactFormValue) !== JSON.stringify(this.initialContactForm.value);
+			});
+	}
+
 	setUsernameValidator(selectedContact?: IContactResponse): void {
 		if (!this.isPreviewMode) {
-			const uniqueNameValidator = ContactValidator.contactNameValidator(this.contactService);
+			const uniqueNameValidator = ContactValidator.contactNameValidator(this.contactService, selectedContact);
 			this.contactForm.get('name').setAsyncValidators(uniqueNameValidator);
 
 			if (selectedContact) {
@@ -122,11 +124,15 @@ export class ContactEditComponent implements OnInit, OnDestroy {
 		}
 	}
 
-	updateContactForm(selectedContact: IContactResponse): void {
+	updateContactForms(selectedContact: IContactResponse): void {
 		const { name, number: contactNumber, email, tags } = selectedContact;
-
 		this.contactForm.patchValue({ name, number: contactNumber, email });
-		tags.forEach(tag => this.tags.push(new FormControl(tag)));
+		this.initialContactForm.patchValue(this.contactForm.value);
+
+		tags.forEach(tag => {
+			this.tags.push(new FormControl(tag));
+			this.initialTags.push(new FormControl(tag));
+		});
 	}
 
 	setFormDisabledState(disabled: boolean): void {
@@ -138,7 +144,23 @@ export class ContactEditComponent implements OnInit, OnDestroy {
 		}
 	}
 
+	onAddTag(): void {
+		this.tags.push(new FormControl(''));
+	}
+
+	onRemoveTag(tagIndex: number): void {
+		this.tags.removeAt(tagIndex);
+	}
+
+	onGoBack(): void {
+		this.router.navigateByUrl('');
+	}
+
 	get tags(): FormArray {
 		return this.contactForm.get('tags') as FormArray;
+	}
+
+	get initialTags(): FormArray {
+		return this.initialContactForm.get('tags') as FormArray;
 	}
 }
