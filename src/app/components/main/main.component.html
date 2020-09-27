@@ -1,0 +1,33 @@
+<div class="container">
+	<div class="card">
+		<div class="card__header">
+			<mat-form-field appearance="legacy" class="card__header--input">
+				<mat-label>Find contacts</mat-label>
+				<input matInput #userSearchInfo>
+			</mat-form-field>
+			<span>
+				<mat-icon aria-hidden="false" aria-label="Add contact icon" class="card__icon" matTooltip="Add contact"
+					(click)="onAddContact()">
+					add
+				</mat-icon>
+			</span>
+		</div>
+		<div class="card__body">
+			<div class="card__body--contact-number">
+				{{(contactsInfo$ | async | contact:userSearchInfo.value | contactsLength)}} contacts
+			</div>
+			<ng-container *ngIf="contactsInfo$ | async as contactsInfo else loadingTemplate">
+				<ng-container *ngIf="contactsInfo.length else noContactsTemplate">
+					<app-contact-item *ngFor="let contactInfo of contactsInfo | contact:userSearchInfo.value"
+						[contactInfo]="contactInfo"></app-contact-item>
+				</ng-container>
+				<ng-template #noContactsTemplate>
+					<h3 class="card__body--no-contact">No contacts to show</h3>
+				</ng-template>
+			</ng-container>
+			<ng-template #loadingTemplate>
+				<h3 class="card__body--no-contact">Loading...</h3>
+			</ng-template>
+		</div>
+	</div>
+</div>

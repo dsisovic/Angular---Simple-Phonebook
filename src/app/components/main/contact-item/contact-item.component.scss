@@ -1,0 +1,41 @@
+@import '../../../partials/variables';
+
+.container {
+	&__header {
+		font-size: 2.5rem;
+	}
+
+	&__content {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+
+		&--info {
+			h3 {
+				margin-bottom: 0;
+			}
+		}
+
+		&--selected {
+			position: relative;
+
+			&::after {
+				content: '';
+				width: 100%;
+				height: 1px;
+				background: #EBEBEB;
+				position: absolute;
+				bottom: 5px;
+				left: 0;
+			}
+		}
+	}
+
+	&__icon {
+		cursor: pointer;
+
+		&--delete {
+			color: $warning-style;
+		}
+	}
+}
