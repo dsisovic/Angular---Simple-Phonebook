@@ -1,0 +1,58 @@
+@import '../../partials/variables';
+@import '../styles/card.style.scss';
+
+.container {
+	@extend .container__generic;
+
+	.card {
+		@extend .card__generic;
+
+		&::after {
+			content: '';
+			width: 100%;
+			height: 1px;
+			background: #EBEBEB;
+			position: absolute;
+			top: 100px;
+			left: 0;
+		}
+
+		&__header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+
+			&--input {
+				width: 90%;
+				margin: 0 auto;
+				display: block;
+			}
+		}
+
+		&__body {
+			margin-top: 3em;
+
+			&--no-contact {
+				text-align: center;
+			}
+
+			&--contact-number {
+				margin: 1em 0;
+				display: flex;
+				justify-content: flex-end;
+			}
+		}
+
+		&__icon {
+			cursor: pointer;
+		}
+	}
+}
+
+@media only screen and (max-width: $breakpoint-sm) {
+	.container {
+		.card {
+			width: 100%;
+		}
+	}
+}

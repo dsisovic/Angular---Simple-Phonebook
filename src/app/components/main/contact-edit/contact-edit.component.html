@@ -1,0 +1,74 @@
+<div class="container">
+	<div class="card">
+		<ng-container *ngIf="!isLoading else loadingTemplate">
+			<div class="card__header">
+				<span class="card__header--content" matTooltip="Go back" (click)="onGoBack()">
+					<mat-icon aria-hidden="false" aria-label="Go back">
+						keyboard_arrow_left
+					</mat-icon>
+					Go back
+				</span>
+				<div>
+					<button mat-raised-button color="primary" (click)="onSaveContact()" matTooltip="Save contact"
+						[disabled]="!contactForm.valid" *ngIf="!isPreviewMode">
+						Save
+					</button>
+				</div>
+			</div>
+			<div class="card__body">
+				<form [formGroup]="contactForm" class="card__form">
+					<div class="card__form--field">
+						<mat-form-field appearance="legacy" class="card__form--input">
+							<mat-label>Username</mat-label>
+							<input matInput formControlName="name">
+							<mat-icon matSuffix>person</mat-icon>
+							<mat-hint class="card__form--invalid" *ngIf="contactForm.get('name').hasError('required')">
+								Username is required
+							</mat-hint>
+							<mat-hint class="card__form--invalid" *ngIf="contactForm.get('name').hasError('duplicatedUsername')">
+								This username is already taken
+							</mat-hint>
+						</mat-form-field>
+					</div>
+					<div class="card__form--field">
+						<mat-form-field appearance="legacy" class="card__form--input">
+							<mat-label>Number</mat-label>
+							<input matInput formControlName="number">
+							<mat-icon matSuffix>format_list_numbered</mat-icon>
+							<mat-hint class="card__form--invalid" *ngIf="contactForm.get('number').hasError('required')">
+								Number is required
+							</mat-hint>
+						</mat-form-field>
+					</div>
+					<div class="card__form--field">
+						<mat-form-field appearance="legacy" class="card__form--input">
+							<mat-label>Email</mat-label>
+							<input matInput formControlName="email">
+							<mat-icon matSuffix>email</mat-icon>
+							<mat-hint class="card__form--invalid" *ngIf="contactForm.get('email').hasError('email')">
+								Email must have valid format
+							</mat-hint>
+						</mat-form-field>
+					</div>
+					<button mat-mini-fab color="primary" aria-label="Add tag" matTooltip="Add tag" (click)="onAddTag()"
+						class="card__tag--icon" *ngIf="!isPreviewMode">
+						<mat-icon>add</mat-icon>
+					</button>
+					<div class="card__form--field card__tag--container" *ngFor="let tag of tags.controls; let i = index"
+						(mouseenter)="tagIndex = i" (mouseleave)="tagIndex = null">
+						<mat-form-field appearance="legacy" class="card__form--input">
+							<input matInput [formControl]="tags.controls[i]" [placeholder]="'Tag name ' + (i + 1)">
+						</mat-form-field>
+						<mat-icon aria-hidden="false" aria-label="Remove tag" class="card__icon card__icon--delete"
+							*ngIf="tagIndex === i && !isPreviewMode" matTooltip="Remove tag" (click)="onRemoveTag(i)">
+							delete
+						</mat-icon>
+					</div>
+				</form>
+			</div>
+		</ng-container>
+		<ng-template #loadingTemplate>
+			<h3 class="card__no-contact">Loading...</h3>
+		</ng-template>
+	</div>
+</div>

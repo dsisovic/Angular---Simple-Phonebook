@@ -1,0 +1,72 @@
+@import '../../styles/card.style.scss';
+@import '../../../partials/variables';
+
+.container {
+	@extend .container__generic;
+
+	.card {
+		@extend .card__generic;
+
+		&::after {
+			content: '';
+			width: 100%;
+			height: 1px;
+			background: #EBEBEB;
+			position: absolute;
+			top: 90px;
+			left: 0;
+		}
+
+		&__header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+
+			&--content {
+				@extend .card__header;
+				cursor: pointer;
+			}
+		}
+
+		&__body {
+			margin-top: 4em;
+		}
+
+		&__form {
+			&--field {
+				margin-bottom: 2em;
+			}
+
+			&--input {
+				width: 100%;
+			}
+
+			&--invalid {
+				color: $warning-style;
+			}
+		}
+
+		&__icon {
+			cursor: pointer;
+
+			&--delete {
+				color: $warning-style;
+			}
+		}
+
+		&__tag {
+			&--container {
+				display: flex;
+				justify-content: space-between;
+			}
+
+			&--icon {
+				margin-bottom: 2em;
+			}
+		}
+
+		&__no-contact {
+			text-align: center;
+		}
+	}
+}

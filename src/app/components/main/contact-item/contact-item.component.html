@@ -1,0 +1,25 @@
+<div class="container">
+	<h1 class="container__header">{{contactInfo.headerLetter | uppercase}}</h1>
+	<div class="container__content" *ngFor="let contact of contactInfo.contacts; trackBy: trackByContactId"
+		(mouseenter)="selectedContactId = contact.id" (mouseleave)="selectedContactId = null"
+		[ngClass]="{'container__content--selected': selectedContactId === contact.id}">
+		<div class="container__content--info">
+			<h3>{{contact.name | slice:0:25}}</h3>
+			<h5>{{contact.number | slice:0:20}}</h5>
+		</div>
+		<div *ngIf="selectedContactId === contact.id">
+			<mat-icon aria-hidden="false" aria-label="Edit contact" class="container__icon container__icon--edit"
+				matTooltip="Edit contact" (click)="onEditContact(contact.id)">
+				edit
+			</mat-icon>
+			<mat-icon aria-hidden="false" aria-label="Preview contact" class="container__icon container__icon--edit"
+				matTooltip="Preview contact" (click)="onPreviewContact(contact.id)">
+				info
+			</mat-icon>
+			<mat-icon aria-hidden="false" aria-label="Delete contact info" class="container__icon container__icon--delete"
+				matTooltip="Delete contact" (click)="onDeleteContact(contact)">
+				delete
+			</mat-icon>
+		</div>
+	</div>
+</div>
