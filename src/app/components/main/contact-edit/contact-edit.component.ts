@@ -6,7 +6,6 @@ import { takeUntil } from 'rxjs/operators';
 import { ContactService } from '../services/contact.service';
 import { IContactResponse } from '../ts/models/contact-response.model';
 import { ContactValidator } from './validators/contact.validators';
-
 @Component({
 	selector: 'app-contact-edit',
 	templateUrl: './contact-edit.component.html',

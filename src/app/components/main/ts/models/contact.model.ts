@@ -1,6 +1,5 @@
 import { IContactResponse } from './contact-response.model';
-
-export interface IContact {
+export interface IContactData {
 	headerLetter: string;
 	contacts: IContactResponse[];
 }

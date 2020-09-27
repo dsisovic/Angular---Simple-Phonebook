@@ -5,7 +5,7 @@ import { catchError, map, shareReplay, switchMap } from 'rxjs/operators';
 import { BehaviorSubject, EMPTY, Observable, of } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { IContactResponse } from '../ts/models/contact-response.model';
-import { IContact } from '../ts/models/contact.model';
+import { IContactData } from '../ts/models/contact.model';
 import { INewContact } from '../ts/models/new-contact.model';
 import { Router } from '@angular/router';
 
@@ -30,7 +30,7 @@ export class ContactService {
 
 	// HTTP
 
-	fetchContacts$(): Observable<IContact[]> {
+	fetchContacts$(): Observable<IContactData[]> {
 		return this.http.get<IContactResponse[]>(this.fetchContactsUrl)
 			.pipe(
 				map(contacts => this.formatContactsResponse(contacts)),
@@ -73,7 +73,7 @@ export class ContactService {
 
 	// LOGIC
 
-	formatContactsResponse(contacts: IContactResponse[]): IContact[] {
+	formatContactsResponse(contacts: IContactResponse[]): IContactData[] {
 		return contacts
 			.reduce((accumulator, contact) => {
 				const contactFirstLetter = contact.name.charAt(0);
@@ -87,7 +87,7 @@ export class ContactService {
 			});
 	}
 
-	formatPipeContacts(contactsInfo: IContact[], userSearchInfo: string): IContact[] {
+	formatPipeContacts(contactsInfo: IContactData[], userSearchInfo: string): IContactData[] {
 		if (userSearchInfo) {
 			return contactsInfo.reduce((accumulator, contactInfo) => {
 				const { contacts, headerLetter } = contactInfo;
@@ -98,7 +98,7 @@ export class ContactService {
 		return contactsInfo;
 	}
 
-	formatPipeContactsLength(contactsInfo: IContact[]): number {
+	formatPipeContactsLength(contactsInfo: IContactData[]): number {
 		if (contactsInfo) {
 			return contactsInfo
 				.map(contactInfo => contactInfo.contacts.length)
@@ -118,7 +118,7 @@ export class ContactService {
 		this.fetchContactState.next(true);
 	}
 
-	getFetchContactState$(): Observable<IContact[]> {
+	getFetchContactState$(): Observable<IContactData[]> {
 		return this.fetchContactState.asObservable()
 			.pipe(
 				switchMap(_ => this.fetchContacts$()),
