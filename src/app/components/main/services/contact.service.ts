@@ -2,22 +2,18 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { catchError, map, shareReplay, switchMap } from 'rxjs/operators';
-import { BehaviorSubject, EMPTY, Observable, of } from 'rxjs';
-import { environment } from '../../../../environments/environment';
+import { BehaviorSubject, EMPTY, from, Observable, of } from 'rxjs';
 import { IContactResponse } from '../ts/models/contact-response.model';
 import { IContactData } from '../ts/models/contact.model';
-import { INewContact } from '../ts/models/new-contact.model';
+import { IContactWithoutUUID } from '../ts/models/contact-no-uuid';
 import { Router } from '@angular/router';
-
+import { AngularFirestore } from '@angular/fire/firestore';
 @Injectable({
 	providedIn: 'root'
 })
 export class ContactService {
 
-	private addContactUrl: string = environment.apiUrl + '/post';
-	private editContactUrl: string = environment.apiUrl + '/put';
-	private fetchContactsUrl: string = environment.apiUrl + '/get';
-	private deleteContactUrl: string = environment.apiUrl + '/delete';
+	private readonly firebaseCollection = 'contacts';
 
 	private fetchContactState: BehaviorSubject<boolean> = new BehaviorSubject(true);
 	private markUsernameValidatorState: BehaviorSubject<void> = new BehaviorSubject(null);
@@ -25,23 +21,31 @@ export class ContactService {
 	constructor(
 		private router: Router,
 		private http: HttpClient,
-		private formBuilder: FormBuilder
+		private formBuilder: FormBuilder,
+		private firestoreService: AngularFirestore
 	) { }
 
 	// HTTP
 
 	fetchContacts$(): Observable<IContactData[]> {
-		return this.http.get<IContactResponse[]>(this.fetchContactsUrl)
+		return this.fetchFirebaseContacts$()
 			.pipe(
-				map(contacts => this.formatContactsResponse(contacts)),
+				map(contacts => this.formatContactsResponse(contacts))
+			);
+	}
+
+	fetchFirebaseContacts$(): Observable<IContactResponse[]> {
+		return this.firestoreService.collection(this.firebaseCollection).snapshotChanges()
+			.pipe(
+				map(response => response.map(entry => ({ id: entry.payload.doc.id, ...entry.payload.doc.data() as IContactWithoutUUID }))),
 				catchError(_ => of([]))
 			);
 	}
 
 	fetchContactById$(contactId: string): Observable<IContactResponse> {
-		return this.http.get<IContactResponse[]>(this.fetchContactsUrl + `/${contactId}`)
+		return from(this.firestoreService.collection(this.firebaseCollection).doc(contactId).valueChanges())
 			.pipe(
-				map((contacts: IContactResponse[]) => contacts[0]),
+				map((contact: IContactWithoutUUID) => ({ id: contactId, ...contact })),
 				catchError(_ => {
 					this.router.navigateByUrl('');
 					return EMPTY;
@@ -49,23 +53,38 @@ export class ContactService {
 			);
 	}
 
-	addContact$(contact: INewContact): Observable<IContactResponse[]> {
-		return this.http.post<IContactResponse[]>(this.addContactUrl, contact);
+	addContact$(contact: IContactWithoutUUID): Observable<null> {
+		return from(this.firestoreService.collection(this.firebaseCollection).add(contact))
+			.pipe(
+				map(_ => null)
+			);
 	}
 
-	editContact$(contact: IContactResponse): Observable<IContactResponse[]> {
-		return this.http.put<IContactResponse[]>(this.editContactUrl, contact);
+	editContact$(contact: IContactResponse): Observable<null> {
+		return from(this.firestoreService.doc(this.firebaseCollection + `/${contact.id}`).update(contact))
+			.pipe(
+				map(_ => null)
+			);
 	}
 
 	deleteContact$(contactId: string): Observable<IContactResponse[]> {
-		return this.http.delete<IContactResponse[]>(this.deleteContactUrl + `/${contactId}`);
+		return from(this.firestoreService.doc(this.firebaseCollection + `/${contactId}`).delete())
+			.pipe(
+				map(_ => null)
+			);
 	}
 
-	checkIfUniqueUsername$(username: string): Observable<ValidationErrors | null> {
-		return this.http.get<IContactResponse[]>(this.fetchContactsUrl)
+	checkIfUniqueUsername$(username: string, selectedContact?: IContactResponse): Observable<ValidationErrors | null> {
+		return this.fetchFirebaseContacts$()
 			.pipe(
 				map(contacts => {
-					const contactMatches = contacts.some(contact => contact.name === username);
+					let contactMatches: boolean;
+
+					if (selectedContact) {
+						contactMatches = contacts.some(contact => contact.name === username && selectedContact.name !== username);
+					} else {
+						contactMatches = contacts.some(contact => contact.name === username);
+					}
 					return contactMatches ? { duplicatedUsername: true } : null;
 				})
 			);

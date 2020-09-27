@@ -10,12 +10,13 @@
 				</span>
 				<div>
 					<button mat-raised-button color="primary" (click)="onSaveContact()" matTooltip="Save contact"
-						[disabled]="!contactForm.valid" *ngIf="!isPreviewMode">
+						[disabled]="!contactForm.valid || !contactFormChanged" *ngIf="!isPreviewMode">
 						Save
 					</button>
 				</div>
 			</div>
 			<div class="card__body">
+				<h2 *ngIf="!isAddMode">"{{contactName}}" contact details</h2>
 				<form [formGroup]="contactForm" class="card__form">
 					<div class="card__form--field">
 						<mat-form-field appearance="legacy" class="card__form--input">
