@@ -5,7 +5,6 @@ import { takeUntil } from 'rxjs/operators';
 import { ContactService } from '../services/contact.service';
 import { IContactResponse } from '../ts/models/contact-response.model';
 import { IContact } from '../ts/models/contact.model';
-
 @Component({
 	selector: 'app-contact-item',
 	templateUrl: './contact-item.component.html',
