@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { FormArray, FormControl, FormGroup } from '@angular/forms';
+import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -115,12 +115,7 @@ export class ContactEditComponent implements OnInit, OnDestroy {
 		if (!this.isPreviewMode) {
 			const uniqueNameValidator = ContactValidator.contactNameValidator(this.contactService, selectedContact);
 			this.contactForm.get('name').setAsyncValidators(uniqueNameValidator);
-
-			if (selectedContact) {
-				setTimeout(() => {
-					this.contactForm.patchValue({ name: selectedContact.name });
-				}, 0);
-			}
+			this.updateContactName();
 		}
 	}
 
@@ -144,8 +139,14 @@ export class ContactEditComponent implements OnInit, OnDestroy {
 		}
 	}
 
+	updateContactName(): void {
+		setTimeout(() => {
+			this.contactForm.patchValue({ name: this.contactForm.value.name });
+		}, 0);
+	}
+
 	onAddTag(): void {
-		this.tags.push(new FormControl(''));
+		this.tags.push(new FormControl('', [Validators.required]));
 	}
 
 	onRemoveTag(tagIndex: number): void {

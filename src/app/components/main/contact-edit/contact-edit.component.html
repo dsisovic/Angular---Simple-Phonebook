@@ -16,7 +16,7 @@
 				</div>
 			</div>
 			<div class="card__body">
-				<h2 *ngIf="!isAddMode">"{{contactName}}" contact details</h2>
+				<h2 *ngIf="!isAddMode">"{{contactName | slice:0:25}}" contact details</h2>
 				<form [formGroup]="contactForm" class="card__form">
 					<div class="card__form--field">
 						<mat-form-field appearance="legacy" class="card__form--input">
@@ -51,20 +51,25 @@
 							</mat-hint>
 						</mat-form-field>
 					</div>
+					<div class="card__form--field" *ngFor="let tag of tags.controls; let i = index" (mouseenter)="tagIndex = i"
+						(mouseleave)="tagIndex = null">
+						<div class="card__tag--container">
+							<mat-form-field appearance="legacy" class="card__form--input">
+								<input matInput [formControl]="tags.controls[i]" [placeholder]="'Tag name ' + (i + 1)">
+							</mat-form-field>
+							<mat-icon aria-hidden="false" aria-label="Remove tag" class="card__icon card__icon--delete"
+								*ngIf="tagIndex === i && !isPreviewMode" matTooltip="Remove tag" (click)="onRemoveTag(i)">
+								delete
+							</mat-icon>
+						</div>
+						<mat-hint class="card__form--invalid" *ngIf="tags.controls[i].hasError('required')">
+							Please provide tag name
+						</mat-hint>
+					</div>
 					<button mat-mini-fab color="primary" aria-label="Add tag" matTooltip="Add tag" (click)="onAddTag()"
 						class="card__tag--icon" *ngIf="!isPreviewMode">
 						<mat-icon>add</mat-icon>
 					</button>
-					<div class="card__form--field card__tag--container" *ngFor="let tag of tags.controls; let i = index"
-						(mouseenter)="tagIndex = i" (mouseleave)="tagIndex = null">
-						<mat-form-field appearance="legacy" class="card__form--input">
-							<input matInput [formControl]="tags.controls[i]" [placeholder]="'Tag name ' + (i + 1)">
-						</mat-form-field>
-						<mat-icon aria-hidden="false" aria-label="Remove tag" class="card__icon card__icon--delete"
-							*ngIf="tagIndex === i && !isPreviewMode" matTooltip="Remove tag" (click)="onRemoveTag(i)">
-							delete
-						</mat-icon>
-					</div>
 				</form>
 			</div>
 		</ng-container>
