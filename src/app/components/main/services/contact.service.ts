@@ -119,9 +119,7 @@ export class ContactService {
 
 	formatPipeContactsLength(contactsInfo: IContactData[]): number {
 		if (contactsInfo) {
-			return contactsInfo
-				.map(contactInfo => contactInfo.contacts.length)
-				.reduce((accumulator, numberOfContacts) => accumulator + numberOfContacts, 0);
+			return contactsInfo.reduce((accumulator, contactInfo) => accumulator + contactInfo.contacts.length, 0);
 		}
 		return 0;
 	}
